@@ -1,0 +1,19 @@
+*, *::before, *::after { 
+  box-sizing: border-box; 
+}
+
+main {
+  margin: 150px 0;
+}
+
+main .table {
+  margin-top: 0;
+}
+
+main .btn-large {
+  margin: 0 10px;
+  height: 150px;
+  width: 150px;
+  line-height: 150px;
+  font-size: 50px;
+}
