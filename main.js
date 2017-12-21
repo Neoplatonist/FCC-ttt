@@ -1,5 +1,9 @@
 $(document).ready(function() { 
-  $('select').material_select(); 
+  // $('.modal').modal({
+  //   dismissible: false
+  // });
+  // $('#modal1').modal('open');
+  $('select').material_select();
 });
 
 
@@ -10,11 +14,8 @@ $(document).ready(function() {
   let state = {
     ai: {
       board: [],
-      move: -1,
       numBoard: [],
       numTurn: 0,
-      score: -2,
-      tempScore: 0,
       turn: ''
     },
     board: [], // 9 positions
@@ -75,7 +76,7 @@ $(document).ready(function() {
         state.ai.board = state.board = moveBoard()
         checkWin(e.target.innerHTML, state.board)
         
-        if (state.playerO === 'ai') {
+        if (state.playerX === 'ai' || state.playerO === 'ai') {
           aiMove()
         }
       }
@@ -180,6 +181,7 @@ $(document).ready(function() {
     }
 
     $('select').prop('disabled', false)
+    $('select').val('human')
     $('select').material_select()
     parent.addEventListener('click', move, false)
 
@@ -201,24 +203,12 @@ $(document).ready(function() {
     }
   }
 
-  const playerOchange = (e) => {
-    if (!state.gameStarted) {
-      let player = e.target.value
-      
-      if (player === 'ai') {
-        // AI
-        state.playerO = 'ai'
-      } else {
-        // Human
-        state.playerO = 'human'
-      }
-    }
-
-    console.log(state)
-  }
-
   const aiMove = () => {
     // Convert ai.board to numBoard
+    let move = -1
+    let score = -2
+    let tempScore = 0
+
     for (let i = 0; i < 9; i++) {
       state.ai.numBoard[i] = convert(state.ai.board[i])
     }
@@ -231,25 +221,22 @@ $(document).ready(function() {
 
         console.log('numboard before/after')
         console.log(state.ai.numBoard)
-        state.ai.tempScore = -negamax(state.ai.numTurn * -1, state.ai.numBoard)
+        let board = state.ai.numBoard
+        tempScore = -negamax(state.ai.numTurn * -1, board)
         console.log(state.ai.numBoard)
-
 
         state.ai.numBoard[i] = 0
 
-        if (state.ai.tempScore > state.ai.score) {
-          state.ai.score = state.ai.tempScore
-          state.ai.move = i
+        if (tempScore > score) {
+          score = tempScore
+          console.log('Updated AI Move')
+          move = i
+          console.log(move)
         }
       }
     }
 
-    // converting num to ai
-    for (let i = 0; i < 9; i++) {
-      state.ai.board[i] = convert(state.ai.numBoard[i])
-    }
-
-    aiRender() // use the state.ai.move
+    aiRender(move) // use the state.ai.move
     checkWin(state.turn, state.board)
 
     if (state.turn === 'X') {
@@ -259,25 +246,23 @@ $(document).ready(function() {
     }
   }
 
-  const aiRender = () => {
+  const aiRender = (move) => {
     console.log('Ai renders')
     let pos = document.querySelectorAll('.board-pos')
-    console.log(state.ai.move)
 
     for (let i = 0; i < 9; i++) {
       console.log(i)
-      if (state.ai.move === i) {
-        console.log(state.ai.move)
+      if (move === i) {
+        console.log(move)
         pos[i].innerHTML = state.turn
-        console.log(pos[i].innerHTML)
+
+        console.log('State Turn placed in pos ^ ' + pos[i].innerHTML)
         state.board[i] = state.turn
-      } else {
-        state.board[i] = pos[i].innerHTML
       }
     }
   }
 
-  const negamax = (player) => {
+  const negamax = (player, board) => {
     let winner = checkWinAi(board)
     if (winner !== 0) {
       return player * winner
@@ -308,10 +293,45 @@ $(document).ready(function() {
     return score
   }
 
+  const playerChange = (e) => {
+    if (!state.gameStarted) {
+      let player = e.target.value
+
+      switch (e.target.id) {
+        case 'changeX':
+          if (player === 'ai') {
+            state.playerX = 'ai'
+            state.ai.board = state.board = moveBoard()
+            aiMove()
+          } else {
+            state.playerX = 'human'
+          }
+          break
+        case 'changeO':
+          if (player === 'ai') {
+            state.playerO = 'ai'
+
+            if (state.playerX === 'ai') {
+              $('select').prop('disabled', false)
+              $('select').material_select()
+
+              aiMove()
+            }
+          } else {
+            state.playerO = 'human'
+          }
+          break
+        default:
+          break
+      }
+    }
+  }
+
   parent.addEventListener('click', move, false)
   document.getElementById('reset').addEventListener('click', reset, false)
   document.getElementById('changeType').addEventListener('click', changeType, false)
-  document.getElementById('changeO').onchange = playerOchange
+  document.getElementById('changeX').onchange = playerChange
+  document.getElementById('changeO').onchange = playerChange
 })()
 
 
