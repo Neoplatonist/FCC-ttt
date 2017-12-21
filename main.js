@@ -168,11 +168,45 @@ $(document).ready(function() {
     return 0
   }
 
+  const playerChange = (e) => {
+    if (!state.gameStarted) {
+      let player = e.target.value
+
+      switch (e.target.id) {
+        case 'changeX':
+          if (player === 'ai') {
+            state.playerX = 'ai'
+
+            $('select').prop('disabled', true);
+            $('select').material_select();
+
+            state.ai.board = state.board = moveBoard()
+
+            state.gameStarted = true
+
+            aiMove()
+          }
+          break
+        case 'changeO':
+          if (player === 'ai') {
+            state.playerO = 'ai'
+
+            $('select').prop('disabled', true)
+            $('select').material_select()
+          }
+          break
+        default:
+          break
+      }
+    }
+  }
+
   const reset = () => {
     let board = document.querySelectorAll('.board-pos')
     let change = document.getElementById('changeType')
 
     state.turn = 'X'
+    state.playerX = state.playerO = 'human'
     change.textContent = 'X START'
     state.gameStarted = false
 
@@ -293,81 +327,9 @@ $(document).ready(function() {
     return score
   }
 
-  const playerChange = (e) => {
-    if (!state.gameStarted) {
-      let player = e.target.value
-
-      switch (e.target.id) {
-        case 'changeX':
-          if (player === 'ai') {
-            state.playerX = 'ai'
-            state.ai.board = state.board = moveBoard()
-            aiMove()
-          } else {
-            state.playerX = 'human'
-          }
-          break
-        case 'changeO':
-          if (player === 'ai') {
-            state.playerO = 'ai'
-
-            if (state.playerX === 'ai') {
-              $('select').prop('disabled', false)
-              $('select').material_select()
-
-              aiMove()
-            }
-          } else {
-            state.playerO = 'human'
-          }
-          break
-        default:
-          break
-      }
-    }
-  }
-
   parent.addEventListener('click', move, false)
   document.getElementById('reset').addEventListener('click', reset, false)
   document.getElementById('changeType').addEventListener('click', changeType, false)
   document.getElementById('changeX').onchange = playerChange
   document.getElementById('changeO').onchange = playerChange
 })()
-
-
-// Negamax Init
-
-// Recursive
-// func Negamax(board []int, player int) int {
-// 	winner := tttBoard.CheckWinAi(board)
-// 	if winner != 0 {
-// 		return player * winner
-// 	}
-
-// 	move := -1
-// 	score := -2
-
-// 	// goes through all possible moves on board
-// 	for i := 0; i < 9; i++ {
-// 		// checks if position on board is empty
-// 		if board[i] == 0 {
-// 			// tries the move
-// 			board[i] = player
-
-// 			thisScore := -Negamax(board, player*-1)
-
-// 			if thisScore > score {
-// 				score = thisScore
-// 				move = i
-// 			}
-
-// 			board[i] = 0
-// 		}
-// 	}
-
-// 	if move == -1 {
-// 		return 0
-// 	}
-
-// 	return score
-// }
